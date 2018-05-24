@@ -1,0 +1,8 @@
+*.old
+*.mp3
+*.webm
+/ref/*
+/output/*
+/test/*
+/__pycache__/*
+*.pyc
