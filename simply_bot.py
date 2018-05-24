@@ -2,7 +2,7 @@ import discord
 import asyncio
 from code import interact
 import re
-import media_from_yt as myt
+from media_from_yt import media_from_yt as myt
 import zipfile
 import os
 import shutil
@@ -79,4 +79,13 @@ async def on_message(msg):
 if __name__ == '__main__':
     executor = ProcessPoolExecutor()
     loop  = asyncio.get_event_loop()
-    client.run(TOKEN)
+    try:
+        client.run(TOKEN)
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        exec_info = sys.exc_info()
+        traceback.print_exception(*exec_info)
+    finally:
+        client.logout()
+        client.close()
