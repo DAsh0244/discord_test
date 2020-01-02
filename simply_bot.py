@@ -22,7 +22,7 @@ yt_url = re.compile(r'^(?:https?\:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.?be)\/w
 
 client = discord.Client()
 PREFIX = '$'
-TOKEN = 'NDE1MzY5OTcyMDEzODU4ODI2.DW-_3g.N6ixlZI2o6LeGrJEpU2O81zjOYc'
+TOKEN = os.environ.get('DISCORD_API_TOKEN')
 
 @client.event
 async def on_ready():
