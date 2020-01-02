@@ -18,11 +18,12 @@ myt.ch.setLevel(logging.DEBUG)
 
 CHANNEL = 415359063719936005
 DISCORD_MAX_FILE_SIZE = 8*1024*1024  # 8MB
-yt_url = re.compile(r'^(?:https?\:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.?be)\/watch\?v=(.+?)(?:&.*)?$')
+# yt_url = re.compile(r'^(?:https?\:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.?be)\/watch\?v=(.+?)(?:&.*)?$')
+yt_url = re.compile(r'((?:(?:http(?:s)?:\/\/)?)(?:www\.)?(?:(?:youtube\.com\/)|(?:youtu.be\/))[\S]+)')
 
 client = discord.Client()
 PREFIX = '$'
-TOKEN = os.environ.get('DISCORD_API_TOKEN')
+TOKEN = os.environ['DISCORD_API_TOKEN']
 
 @client.event
 async def on_ready():
@@ -51,15 +52,21 @@ async def on_ready():
                 try:
                     info,track_list = await loop.run_in_executor(executor, myt.get_info, id)
                     if info is not None:
+                        from pprint import pprint
+                        pprint(info)
                         await msg.channel.send(content='now processing: {} '.format(info['title']))
                         outfile, tracklist = await loop.run_in_executor(executor, _call(myt.grab_file, url=id,info=info,track_list=track_list))
+                        pprint(tracklist)
                         if tracklist:
-                            logger.info('slicing chapters from origin...')
-                            out_dir = await loop.run_in_executor(executor,_call(myt.slice_chapters, outfile, track_list, quality='2', ext='mp3'))
-                            print(out_dir)
-                            for root,dir,outfiles in os.walk(out_dir):
-                                for outfile in outfiles:
-                                    await msg.channel.send(file=discord.File(os.path.join(root,outfile)))
+                            if not info['playlist']:
+                                logger.info('slicing chapters from origin...')
+                                out_dir = await loop.run_in_executor(executor,_call(myt.slice_chapters, outfile, track_list, quality='2', ext='mp3'))
+                                print(out_dir)
+                                for root,dir,outfiles in os.walk(out_dir):
+                                    for outfile in outfiles:
+                                        await msg.channel.send(file=discord.File(os.path.join(root,outfile)))
+                            else:
+                                logger.info('sending playlist files...')
                         else:
                             await msg.channel.send(file=discord.File(outfile))
                 except Exception as e:
